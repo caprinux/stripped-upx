@@ -707,54 +707,61 @@ int Packer::patch_le32(void *b, int blen, const void *old, unsigned new_) {
 
 static const char *getIdentstr(unsigned *size, int small) {
     // IMPORTANT: we do NOT change "http://upx.sf.net"
-    static char identbig[] =
-        "\n\0"
-        "$Info: "
-        "This file is packed with the UPX executable packer http://upx.sf.net $"
-        "\n\0"
-        "$Id: UPX " UPX_VERSION_STRING4 " Copyright (C) 1996-" UPX_VERSION_YEAR
-        " the UPX Team. All Rights Reserved. $"
-        "\n";
-    static char identsmall[] =
-        "\n"
-        "$Id: UPX "
-        "(C) 1996-" UPX_VERSION_YEAR " the UPX Team. All Rights Reserved. http://upx.sf.net $"
-        "\n";
-    static char identtiny[] = UPX_VERSION_STRING4;
+    // static char identbig[] =
+    //     "\n\0"
+    //     "$Info: "
+    //     "This file is packed with the UPX executable packer http://upx.sf.net $"
+    //     "\n\0"
+    //     "$Id: UPX " UPX_VERSION_STRING4 " Copyright (C) 1996-" UPX_VERSION_YEAR
+    //     " the UPX Team. All Rights Reserved. $"
+    //     "\n";
+    // static char identsmall[] =
+    //     "\n"
+    //     "$Id: UPX "
+    //     "(C) 1996-" UPX_VERSION_YEAR " the UPX Team. All Rights Reserved. http://upx.sf.net $"
+    //     "\n";
+    // static char identtiny[] = UPX_VERSION_STRING4;
+    //
+    // static upx_std_once_flag init_done;
+    // upx_std_call_once(init_done, []() noexcept {
+    //     if (opt->debug.fake_stub_version[0] || opt->debug.fake_stub_year[0]) {
+    //         struct Ident {
+    //             char *s;
+    //             int len;
+    //         };
+    //         static const Ident idents[] = {{identbig, (int) sizeof(identbig) - 1},
+    //                                        {identsmall, (int) sizeof(identsmall) - 1},
+    //                                        {identtiny, (int) sizeof(identtiny) - 1},
+    //                                        {nullptr, 0}};
+    //         for (const Ident *iter = idents; iter->s; ++iter) {
+    //             if (opt->debug.fake_stub_version[0])
+    //                 mem_replace(iter->s, iter->len, UPX_VERSION_STRING4, 4,
+    //                             opt->debug.fake_stub_version);
+    //             if (opt->debug.fake_stub_year[0])
+    //                 mem_replace(iter->s, iter->len, UPX_VERSION_YEAR, 4, opt->debug.fake_stub_year);
+    //         }
+    //     }
+    // });
+    //
+    // if (small < 0)
+    //     small = opt->small;
+    // if (small >= 2) {
+    //     *size = sizeof(identtiny);
+    //     return identtiny;
+    // } else if (small >= 1) {
+    //     *size = sizeof(identsmall);
+    //     return identsmall;
+    // } else {
+    //     *size = sizeof(identbig);
+    //     return identbig;
+    // }
 
-    static upx_std_once_flag init_done;
-    upx_std_call_once(init_done, []() noexcept {
-        if (opt->debug.fake_stub_version[0] || opt->debug.fake_stub_year[0]) {
-            struct Ident {
-                char *s;
-                int len;
-            };
-            static const Ident idents[] = {{identbig, (int) sizeof(identbig) - 1},
-                                           {identsmall, (int) sizeof(identsmall) - 1},
-                                           {identtiny, (int) sizeof(identtiny) - 1},
-                                           {nullptr, 0}};
-            for (const Ident *iter = idents; iter->s; ++iter) {
-                if (opt->debug.fake_stub_version[0])
-                    mem_replace(iter->s, iter->len, UPX_VERSION_STRING4, 4,
-                                opt->debug.fake_stub_version);
-                if (opt->debug.fake_stub_year[0])
-                    mem_replace(iter->s, iter->len, UPX_VERSION_YEAR, 4, opt->debug.fake_stub_year);
-            }
-        }
-    });
+    // STRIP: all -- remove IDENTSTR from loader
+    static char ident[1] = {0};
+    (void)small;
+    *size = 0;
+    return ident;
 
-    if (small < 0)
-        small = opt->small;
-    if (small >= 2) {
-        *size = sizeof(identtiny);
-        return identtiny;
-    } else if (small >= 1) {
-        *size = sizeof(identsmall);
-        return identsmall;
-    } else {
-        *size = sizeof(identbig);
-        return identbig;
-    }
 }
 
 void Packer::initLoader(const void *pdata, int plen, int small, int pextra) {

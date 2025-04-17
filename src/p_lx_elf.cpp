@@ -401,11 +401,12 @@ off_t PackLinuxElf::pack3(OutputFile *fo, Filter &ft) // return length of output
 
     set_te32(&disp, sz_elf_hdrs + usizeof(p_info) + usizeof(l_info) +
         (!!xct_off & !!is_asl));  // |1 iff android shlib
-    fo->write(&disp, sizeof(disp));  // offset(b_info)
+    // STRIP: that was unnecesssary.
+    // fo->write(&disp, sizeof(disp));  // offset(b_info)
         // FIXME: If is_shlib then that is useful only for the is_asl bit.
         // Better info is the word below with (overlay_offset - sizeof(linfo)).
 
-    len += sizeof(disp);
+    // len += sizeof(disp);
     set_te32(&disp, len);  // distance back to beginning (detect dynamic reloc)
     fo->write(&disp, sizeof(disp));
     len += sizeof(disp);
@@ -803,9 +804,11 @@ off_t PackLinuxElf64::pack3(OutputFile *fo, Filter &ft)
         }
     }
     // write block end marker (uncompressed size 0)
-    b_info hdr; memset(&hdr, 0, sizeof(hdr));
-    set_le32(&hdr.sz_cpr, UPX_MAGIC_LE32);
-    fo->write(&hdr, sizeof(hdr));
+    //
+    // STRIP: ELF64 -- remove final b_info
+    // b_info hdr; memset(&hdr, 0, sizeof(hdr));
+    // set_le32(&hdr.sz_cpr, UPX_MAGIC_LE32);
+    // fo->write(&hdr, sizeof(hdr));
     total_out = fpad4(fo, total_out);
 
     if (0==xct_off) { // not shared library
@@ -6629,8 +6632,9 @@ void PackLinuxElf64::pack4(OutputFile *fo, Filter &ft)
 
         fo->seek(0, SEEK_SET);
         fo->rewrite(&eho->ehdr, sizeof(Elf64_Ehdr) + 2* sizeof(Elf64_Phdr));  // C_BASE, C_TEXT
-        fo->seek(overlay_offset - sizeof(l_info), SEEK_SET);
-        fo->rewrite(&linfo, sizeof(linfo));
+        // STRIP: we don't really care to patch l_info
+        // fo->seek(overlay_offset - sizeof(l_info), SEEK_SET);
+        // fo->rewrite(&linfo, sizeof(linfo));
     }
 }
 

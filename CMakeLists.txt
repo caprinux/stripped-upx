@@ -530,5 +530,6 @@ endif()
 
 upx_cmake_include_hook(9_finish)
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/.upx_cmake_config_done.txt" "")
+set(CMAKE_BUILD_TYPE Debug)
 
 # vim:set ft=cmake ts=4 sw=4 tw=0 et:

@@ -13,6 +13,7 @@
 
 CMAKE = cmake
 UPX_CMAKE_BUILD_FLAGS += --parallel
+CFLAGS =-g
 ifneq ($(VERBOSE),)
   #UPX_CMAKE_BUILD_FLAGS += --verbose # requires CMake >= 3.14
   UPX_CMAKE_CONFIG_FLAGS += -DCMAKE_VERBOSE_MAKEFILE=ON

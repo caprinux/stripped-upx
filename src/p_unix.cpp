@@ -110,7 +110,8 @@ void PackUnix::writePackHeader(OutputFile *fo)
     patchPackHeader(buf, hsize);
     checkPatch(nullptr, 0, 0, 0);  // reset
 
-    fo->write(buf, hsize);
+    (void)fo;
+    // fo->write(buf, hsize);
 }
 
 
@@ -248,15 +249,17 @@ int PackUnix::pack2(OutputFile *fo, Filter &ft)
 void
 PackUnix::patchLoaderChecksum()
 {
-    unsigned char *const ptr = getLoader();
+    // unsigned char *const ptr = getLoader();
     l_info *const lp = &linfo;
     // checksum for loader; also some PackHeader info
-    lp->l_magic = UPX_MAGIC_LE32;  // LE32 always
+    // STRIP: remove l_info magic
+    lp->l_magic = 0x0;  // LE32 always
     set_te16(&lp->l_lsize, (upx_uint16_t) lsize);
     lp->l_version = (unsigned char) ph.version;
     lp->l_format  = (unsigned char) ph.format;
     // INFO: lp->l_checksum is currently unused
-    set_te32(&lp->l_checksum, upx_adler32(ptr, lsize));
+    // STRIP: remove l_info checksum
+    // set_te32(&lp->l_checksum, upx_adler32(ptr, lsize));
 }
 
 off_t PackUnix::pack3(OutputFile *fo, Filter &ft)
@@ -279,9 +282,10 @@ void PackUnix::pack4(OutputFile *fo, Filter &)
 {
     writePackHeader(fo);
 
-    unsigned tmp;
-    set_te32(&tmp, overlay_offset);
-    fo->write(&tmp, sizeof(tmp));
+    // STRIP: remove overlay_offset
+    // unsigned tmp;
+    // set_te32(&tmp, overlay_offset);
+    // fo->write(&tmp, sizeof(tmp));
 }
 
 void PackUnix::pack(OutputFile *fo)
@@ -308,18 +312,20 @@ void PackUnix::pack(OutputFile *fo)
     // Shlib probably did not generate Elf header yet.
     if (fo->st_size()) { // Only append if pack1 actually wrote something.
         p_info hbuf;
-        set_te32(&hbuf.p_progid, progid);
-        set_te32(&hbuf.p_filesize, file_size);
-        set_te32(&hbuf.p_blocksize, blocksize);
+        // STRIP: uninitialized p_info
+        // set_te32(&hbuf.p_progid, progid);
+        // set_te32(&hbuf.p_filesize, file_size);
+        // set_te32(&hbuf.p_blocksize, blocksize);
         fo->write(&hbuf, sizeof(hbuf));
     }
 
     // append the compressed body
     if (pack2(fo, ft)) {
         // write block end marker (uncompressed size 0)
-        b_info hdr; memset(&hdr, 0, sizeof(hdr));
-        set_le32(&hdr.sz_cpr, UPX_MAGIC_LE32);
-        fo->write(&hdr, sizeof(hdr));
+        // STRIP: unix -- remove b_info
+        // b_info hdr; memset(&hdr, 0, sizeof(hdr));
+        // set_le32(&hdr.sz_cpr, UPX_MAGIC_LE32);
+        // fo->write(&hdr, sizeof(hdr));
     }
 
     pack3(fo, ft);  // append loader
